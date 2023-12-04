@@ -18,4 +18,4 @@ echo ">>> Building $contract contract..."
 # -L=<string>              - Add directory to library search path
 # -R=<string>              - Add a resource path for inclusion
 
-eosio-cpp -I="./contracts/$contract/include/" -R="./contracts/$contract/resources" -o="./build/$contract.wasm" -contract="$contract" -abigen ./contracts/$contract/src/$contract.cpp
+cdt-cpp -I="./contracts/$contract/include/" -R="./contracts/$contract/resources" -o="./build/$contract.wasm" -contract="$contract" -abigen ./contracts/$contract/src/$contract.cpp
