@@ -25,7 +25,7 @@ void arbitration::init(name initial_admin) {
     //initialize
     config initial_conf;
     initial_conf.admin = initial_admin;
-	initial_conf.contract_version = "0.1.0";
+		initial_conf.contract_version = "0.1.0";
 
     //set initial config
     configs.set(initial_conf, get_self());
@@ -65,9 +65,8 @@ void arbitration::setversion(string new_version)
     configs.set(conf, get_self());
 }
 
-void arbitration::setconfig(uint16_t max_elected_arbs, uint32_t election_duration, uint32_t runoff_duration,
-	uint32_t election_add_candidates_duration, uint32_t arbitrator_term_length, uint8_t max_claims_per_case, 
-	asset fee_usd, uint32_t claimant_accepting_offers_duration)
+void arbitration::setconfig(uint8_t max_claims_per_case, 
+	asset fee_usd)
 {
 	//open config singleton, get config
     config_singleton configs(get_self(), get_self().value);
@@ -77,17 +76,9 @@ void arbitration::setconfig(uint16_t max_elected_arbs, uint32_t election_duratio
 	require_auth(conf.admin);
 
 	//Configuration checks
-	check(max_elected_arbs > 0, "Arbitrators must be greater than 0");
 	check(max_claims_per_case > 0, "Minimum 1 claim");
 	check(fee_usd.symbol == USD_SYM, "Fee must be set in USD");
-
-	conf.max_elected_arbs = max_elected_arbs;
-	conf.election_voting_ts = election_duration;
-	conf.election_add_candidates_ts = election_add_candidates_duration;
-	conf.arb_term_length = arbitrator_term_length;
-	conf.runoff_election_voting_ts = runoff_duration;
 	conf.max_claims_per_case = max_claims_per_case;
-	conf.claimant_accepting_offers_ts = claimant_accepting_offers_duration;
 	conf.fee_usd = fee_usd;
 
 	//set new config
@@ -337,86 +328,9 @@ void arbitration::readycase(uint64_t case_id, name claimant)
 	casefiles.modify(cf, get_self(), [&](auto &col) {
 		col.case_status = static_cast<uint8_t>(case_status::AWAITING_ARBS);
 		col.update_ts = time_point_sec(current_time_point());
-		col.sending_offers_until_ts = time_point_sec(current_time_point().sec_since_epoch() + conf.claimant_accepting_offers_ts);
 		col.fee_paid_tlos = tlos_fee;
 	});
 }
-
-
-void arbitration::respondoffer(uint64_t case_id, uint64_t offer_id, bool accept) {
-
-	//open config singleton, get config
-	config_singleton configs(get_self(), get_self().value);
-	auto conf = configs.get();
-
-	//open casefile tables and checks that the case exists
-	casefiles_table casefiles(get_self(), get_self().value);
-	const auto& cf = casefiles.get(case_id, "Case not found");
-
-	//To respond an offer, case must be awaiting for arbitrators
-	check(cf.case_status == case_status::AWAITING_ARBS, "Case needs to be in AWAITING ARBS status");
-
-	//authenticate
-	require_auth(cf.claimant);
-
-	//open offers table and checks that the offer exists, belongs to the case ID and it has not been responded yet
-	offers_table offers(get_self(), get_self().value);
-	const auto& offer = offers.get(offer_id, "Offer not found");
-	check(offer.case_id == case_id, "Offer does not belong to the case ID");
-	check(offer.status == offer_status::PENDING, "Offer needs to be pending to be responded");
-
-	//If the claimant accepts the offer, he will need to pay in advance all the arbitrator rate. 
-	//The arbitrator will not receive those funds until the case is resolved and validated by the BPs
-	//If an offer is accepted, all other offers will automatically be declined
-	if(accept) {
-		//Calculate the total USD cost
-		auto usd_total_cost = offer.estimated_hours*offer.hourly_rate;
-
-		//Get the TLOS-USD conversion through delphioracle
-		auto tlosusd = tlosusdprice();
-
-		//Calculate the total amount that needs to be paid by the claimant and substract it from his balance
-		float tlos_cost_amount = float(usd_total_cost.amount*10000 / tlosusd);
-		auto tlos_cost = asset(tlos_cost_amount, TLOS_SYM);
-		sub_balance(cf.claimant, tlos_cost);
-		
-		//The arbitrator rate cost will be added to the reserved funds, because in some scenarios it might be returned
-		//In particular, it will be returned in the case that there's a mistrial (arbitrator recused, was forced to recuse)
-		//or it was dismissed (BPs determined that the ruling wasn't valid)
-		conf.reserved_funds += tlos_cost;
-		configs.set(conf, get_self());
-
-		//Updates casefile
-		casefiles.modify(cf, get_self(), [&](auto &col) {
-			col.arbitrators = vector<name>{offer.arbitrator};;
-			col.case_status = static_cast<uint8_t>(case_status::ARBS_ASSIGNED);
-			col.update_ts = time_point_sec(current_time_point());
-			col.arbitrator_cost_tlos = tlos_cost;
-		});
-
-		//Use secondary index to get all the other offers of the case
-		auto offers_idx = offers.get_index<name("bycase")>();
-		auto itr_start = offers_idx.lower_bound(case_id);
-		auto itr_end = offers_idx.upper_bound(case_id);
-		
-		//Accept the corresponding offer and decline all the other ones
-		for(auto offer_itr = itr_start; offer_itr != itr_end; ++offer_itr) {
-			offers_idx.modify(offer_itr, same_payer, [&](auto& col) {
-				if(offer_itr->offer_id == offer_id) {
-					col.status = static_cast<uint8_t>(offer_status::ACCEPTED);
-				} else {
-					col.status = static_cast<uint8_t>(offer_status::REJECTED);
-				}
-			});
-		}
-	} else {
-		//If the offer was declined, update the status accordingly
-		offers.modify(offer, same_payer, [&](auto& col) {
-			col.status = static_cast<uint8_t>(offer_status::REJECTED);
-		});
-	}
-	
-};
 
 void arbitration::cancelcase(uint64_t case_id) {
 
@@ -693,64 +607,6 @@ void arbitration::setlangcodes(name arbitrator, vector<uint16_t> lang_codes)
 	});
 }
 
-void arbitration::recuse(uint64_t case_id, string rationale, name assigned_arb)
-{	
-	//open config table, get config
-	config_singleton configs(get_self(), get_self().value);
-	auto conf = configs.get();
-
-	//authenticate
-	require_auth(assigned_arb);
-
-	//open casefile tables and checks that the case exists
-	casefiles_table casefiles(get_self(), get_self().value);
-	const auto& cf = casefiles.get(case_id, "Case not found");
-
-	//To recuse from a case, the case cannot be validated by the BPs and 
-	//the arbitrator needs to be assigned to the case
-	check(cf.case_status > case_status::AWAITING_ARBS && cf.case_status < case_status::ENFORCEMENT, 
-	"Unable to recuse if the case has not started or it is resolved");	
-
-	//Check that the arbitrator is assigned to the case
-	auto arb_case = std::find(cf.arbitrators.begin(), cf.arbitrators.end(), assigned_arb);
-	check(arb_case != cf.arbitrators.end(), "Arbitrator isn't selected for this case.");
-
-	assert_string(rationale, std::string("rationale must be greater than 0 and less than 255"));
-
-	//Update casefile
-	casefiles.modify(cf, same_payer, [&](auto &col) {
-		col.case_status = static_cast<uint8_t>(case_status::MISTRIAL);
-	});
-
-	//Return the fee paid and the arbitrator rate cost to the claimant, since the case is considered mistrial
-	auto tlos_returned = cf.fee_paid_tlos + cf.arbitrator_cost_tlos;
-	add_balance(cf.claimant, tlos_returned, get_self());
-
-	//Remove the telos returned from reserved funds
-	conf.reserved_funds -= tlos_returned;
-	configs.set(conf, get_self());
-
-	//open arbitrators table, get assigned arb
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	const auto& arb = arbitrators.get(assigned_arb.value);
-
-	//Update open and recused cases in the arbitrator table
-	vector<uint64_t> new_open_cases = arb.open_case_ids;
-	vector<uint64_t> new_recused_cases = arb.recused_case_ids;
-
-	const auto case_itr = std::find(new_open_cases.begin(), new_open_cases.end(), case_id);
-	if(case_itr != new_open_cases.end()) {
-		new_open_cases.erase(case_itr);
-	}
-	new_recused_cases.emplace_back(case_id);
-
-	arbitrators.modify(arb, same_payer, [&](auto &col) {
-		col.open_case_ids = new_open_cases;
-		col.recused_case_ids = new_recused_cases;
-	});
-}
-
-
 #pragma endregion Arb_Actions
 
 #pragma region BP_Actions
@@ -863,140 +719,6 @@ void arbitration::validatecase(uint64_t case_id, bool proceed)
 	});
 }
 
-void arbitration::forcerecusal(uint64_t case_id, string rationale, name arbitrator) {
-	//open config table, get config
-	config_singleton configs(get_self(), get_self().value);
-	auto conf = configs.get();
-
-	//authenticate
-	require_auth(conf.admin);
-
-	//open casefile tables and checks that the case exists
-	casefiles_table casefiles(get_self(), get_self().value);
-	const auto& cf = casefiles.get(case_id, "Case not found");
-
-	//To force a recusal of an arbitrator from a case, the case cannot be validated by the BPs and 
-	//the arbitrator needs to be assigned to the case
-	check(cf.case_status > case_status::AWAITING_ARBS && cf.case_status < case_status::ENFORCEMENT, 
-		"Unable to force recusal if case has not started or if is resolved");	
-
-	//Check that the arbitrator is assigned to the case
-	auto arb_case = std::find(cf.arbitrators.begin(), cf.arbitrators.end(), arbitrator);
-	check(arb_case != cf.arbitrators.end(), "Arbitrator isn't selected for this case.");
-
-	assert_string(rationale, std::string("rationale must be greater than 0 and less than 255"));
-
-	//Update casefile
-	casefiles.modify(cf, same_payer, [&](auto &col) {
-		col.case_status = static_cast<uint8_t>(case_status::MISTRIAL);
-	});
-
-	//Return the fee paid and the arbitrator rate cost to the claimant, since the case is considered mistrial
-	auto tlos_returned = cf.fee_paid_tlos + cf.arbitrator_cost_tlos;
-	add_balance(cf.claimant, tlos_returned, get_self());
-
-	//Remove the telos returned from reserved funds
-	conf.reserved_funds -= tlos_returned;
-	configs.set(conf, get_self());
-
-	//open arbitrators table, get arbitrator
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	const auto& arb = arbitrators.get(arbitrator.value);
-
-	//Update open and recused cases in the arbitrator table
-	vector<uint64_t> new_open_cases = arb.open_case_ids;
-	vector<uint64_t> new_recused_cases = arb.recused_case_ids;
-
-	const auto case_itr = std::find(new_open_cases.begin(), new_open_cases.end(), case_id);
-	if(case_itr != new_open_cases.end()) {
-		new_open_cases.erase(case_itr);
-	}		
-	new_recused_cases.emplace_back(case_id);
-
-	arbitrators.modify(arb, same_payer, [&](auto &col) {
-		col.open_case_ids = new_open_cases;
-		col.recused_case_ids = new_recused_cases;
-	});
-}
-
-void arbitration::dismissarb(name arbitrator, bool remove_from_cases)
-{	
-	//open config table, get config
-	config_singleton configs(get_self(), get_self().value);
-	auto conf = configs.get();
-
-	//authenticate
-	require_auth(conf.admin);
-
-	//open arbitrators table and checks that arbitrator exists and is not removed nor the term has expired
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	const auto& arb_to_dismiss = arbitrators.get(arbitrator.value, "Arbitrator not found");
-	check(arb_to_dismiss.arb_status != arb_status::REMOVED, "Arbitrator is already removed");
-	check(arb_to_dismiss.arb_status != arb_status::SEAT_EXPIRED && 
-			time_point_sec(current_time_point()) <= arb_to_dismiss.term_expiration, "Arbitrator term has expired");
-
-	//Update arbitrator status to removed
-	arbitrators.modify(arb_to_dismiss, same_payer, [&](auto& a) {
-		a.arb_status = static_cast<uint8_t>(arb_status::REMOVED);
-	});
-
-	//Update arbitrator permissions
-	auto perms = get_arb_permissions();
-	set_permissions(perms);
-
-	//When dismissing an arbitrator, admin can decide to keep the arbitrator in the cases he is handling or
-	//directly removing it from all the cases. All the cases that are in progress will be considered mistrial
-	if(remove_from_cases) {
-		//open casefiles table
-		casefiles_table casefiles(get_self(), get_self().value);
-
-		//Variable containing the total sum of funds returned
-		asset funds_returned = asset(0, TLOS_SYM);
-
-		//Iterate through all the cases that are opened for that arbitrator
-		for(const auto &id: arb_to_dismiss.open_case_ids) {
-			auto cf_it = casefiles.find(id);
-
-			if (cf_it != casefiles.end()) {
-				auto case_arbs = cf_it->arbitrators;
-				auto arb_it = find(case_arbs.begin(), case_arbs.end(), arb_to_dismiss.arb);
-
-				//Only those cases that doesn't have a ruling validate by the BPs will be considered a mistrial
-				if (arb_it != case_arbs.end() && cf_it->case_status < case_status::ENFORCEMENT) {
-					//Update casefile
-					casefiles.modify(cf_it, same_payer, [&](auto &col) {
-						col.case_status = static_cast<uint8_t>(case_status::MISTRIAL);
-					});
-
-					//Return the fee paid and the arbitrator rate cost to the claimant, since the case is considered mistrial
-					auto tlos_returned = cf_it->fee_paid_tlos + cf_it->arbitrator_cost_tlos;
-					add_balance(cf_it->claimant, tlos_returned, get_self());
-
-					//Add the tlos returned to funds_returned to keep track of the total
-					funds_returned += tlos_returned;						
-				}
-			}
-		}
-
-		//Remove the funds returned from reserved funds
-		conf.reserved_funds -= funds_returned;
-		configs.set(conf, get_self());
-
-		//Update open and closed cases in the arbitrator table
-		auto open_ids = arb_to_dismiss.open_case_ids;
-		auto recused_ids = arb_to_dismiss.recused_case_ids;
-
-		recused_ids.insert(recused_ids.end(), open_ids.begin(), open_ids.end());
-		open_ids.clear();
-
-		arbitrators.modify(arb_to_dismiss, same_payer, [&](auto& a) {
-			a.arb_status = static_cast<uint8_t>(arb_status::REMOVED);
-			a.open_case_ids = open_ids;
-			a.recused_case_ids = recused_ids;
-		});
-	}
-}
-
 #pragma endregion BP_Actions
 
 
@@ -1031,18 +753,6 @@ bool arbitration::all_claims_resolved(uint64_t case_id) {
 }
 
 
-vector<arbitration::permission_level_weight> arbitration::get_arb_permissions() {
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	vector<permission_level_weight> perms;
-	for(const auto &a: arbitrators) {
-		if (a.arb_status != arb_status::SEAT_EXPIRED && a.arb_status != arb_status::REMOVED)
-		{
-			perms.emplace_back(permission_level_weight{permission_level{a.arb, "active"_n}, 1});
-		}
-	}
-	return perms;
-}
-
 void arbitration::set_permissions(vector<permission_level_weight> &perms) {
 	//review update auth permissions and weights.
 	if (perms.size() > 0)
@@ -1064,55 +774,6 @@ void arbitration::set_permissions(vector<permission_level_weight> &perms) {
 						std::vector<wait_weight>{}}))
 			.send();
 	}
-}
-
-void arbitration::add_arbitrator(arbitrators_table &arbitrators, name arb_name, string credential_link)
-{	
-	//open config singleton, get config
-    config_singleton configs(get_self(), get_self().value);
-    auto _config = configs.get();
-
-	auto arb = arbitrators.find(arb_name.value);
-	if (arb == arbitrators.end())
-	{
-		arbitrators.emplace(_self, [&](auto &a) {
-			a.arb = arb_name;
-			a.arb_status = static_cast<uint8_t>(arb_status::UNAVAILABLE);
-			a.elected_time = time_point_sec(current_time_point());
-			a.term_expiration = time_point_sec(current_time_point().sec_since_epoch() + _config.arb_term_length);
-			a.open_case_ids = vector<uint64_t>();
-			a.closed_case_ids = vector<uint64_t>();
-			a.credentials_link = credential_link;
-		});
-	}
-	else
-	{
-		arbitrators.modify(arb, same_payer, [&](auto &a) {
-			a.arb_status = static_cast<uint8_t>(arb_status::UNAVAILABLE);
-			a.elected_time = time_point_sec(current_time_point());
-			a.term_expiration = time_point_sec(current_time_point().sec_since_epoch() + _config.arb_term_length);
-			a.credentials_link = credential_link;
-		});
-	}
-}
-
-/**
-* Notifies all the BPs active accounts using require_recipient
-*/
-void arbitration::notify_bp_accounts() {
-
-	eosiosystem::producers_table producers(name("eosio"), name("eosio").value);
-
-	auto most_voted_idx = producers.get_index<name("prototalvote")>();
-	auto producer_itr = most_voted_idx.begin();
-
-	auto bps_counter = 0;
-
-	while(producer_itr != most_voted_idx.end() && bps_counter < 21) {
-		require_recipient(producer_itr->owner);
-		++producer_itr;
-		++bps_counter;
-	}	
 }
 
 

@@ -11,13 +11,11 @@
 #include <eosio/eosio.hpp>
 #include <eosio/permission.hpp>
 #include <eosio/singleton.hpp>
-#include "telosdecide-interface.hpp"
 #include "delphioracle-interface.hpp"
 #include "eosiosystem-interface.hpp"
 
 using namespace std;
 using namespace eosio;
-using namespace telosdecide;
 using namespace delphioracle;
 using namespace eosiosystem;
 
@@ -26,6 +24,9 @@ CONTRACT arbitration : public eosio::contract
 
 public:
 	using contract::contract;
+	static constexpr symbol TLOS_SYM = symbol("TLOS", 4);
+	static constexpr symbol VOTE_SYM = symbol("VOTE", 4);
+	static constexpr symbol USD_SYM = symbol("USD", 4);
 
 #pragma region Enums
 
@@ -78,16 +79,6 @@ public:
 		DISMISSED = 4,
 	};
 
-	friend constexpr bool operator==(const uint8_t &a, const offer_status &b)
-	{
-		return a == static_cast<uint8_t>(b);
-	}
-
-	friend constexpr bool operator!=(const uint8_t &a, const offer_status &b)
-	{
-		return a == static_cast<uint8_t>(b);
-	}
-
 	enum class claim_status : uint8_t
 	{
 		FILED = 1,
@@ -134,29 +125,6 @@ public:
 		return a <= static_cast<uint8_t>(b);
 	}
 
-	enum class arb_status : uint8_t
-	{
-		AVAILABLE = 1,
-		UNAVAILABLE = 2,
-		REMOVED = 3,
-		SEAT_EXPIRED = 4,
-	};
-
-	friend constexpr bool operator==(const uint8_t &a, const arb_status &b)
-	{
-		return a == static_cast<uint8_t>(b);
-	}
-
-	friend constexpr bool operator!=(const uint8_t &a, const arb_status &b)
-	{
-		return a != static_cast<uint8_t>(b);
-	}
-
-	friend constexpr bool operator==(const uint8_t &a, const election_status &b)
-	{
-		return a == static_cast<uint8_t>(b);
-	}
-
 	enum class lang_code : uint16_t
 	{
 		ENGL = 0, // English
@@ -168,12 +136,6 @@ public:
 		SPAN = 6, // Spanish
 		PGSE = 7, // Portuguese
 		SWED = 8	// Swedish
-	};
-
-	struct candidate
-	{
-		name name;
-		asset votes;
 	};
 
 #pragma endregion Enums
@@ -196,9 +158,8 @@ public:
 
 	// set configuration parameters
 	// auth: admin
-	ACTION setconfig(uint16_t max_elected_arbs, uint32_t election_duration, uint32_t runoff_duration,
-									 uint32_t election_add_candidates_duration, uint32_t arbitrator_term_length, uint8_t max_claims_per_case,
-									 asset fee_usd, uint32_t claimant_accepting_offers_duration);
+	ACTION setconfig(uint8_t max_claims_per_case,
+									 asset fee_usd);
 
 #pragma endregion Config_Actions
 
@@ -240,12 +201,6 @@ public:
 	// post: case moves to awaiting arbs stage
 	// auth: claimant
 	ACTION readycase(uint64_t case_id, name claimant);
-
-	// Respond an offer of an arbitator to take the case
-	// pre: case must be in awaiting arbs status
-	// post: if the offer is accepted, case moves to arbs assigned stage
-	// auth: claimant
-	ACTION respondoffer(uint64_t case_id, uint64_t offer_id, bool accept);
 
 	// Cancel a case before accepting any of the arbitators offer
 	// pre: case must be in awaiting arbs status
@@ -318,23 +273,9 @@ public:
 
 #pragma region Arb_Actions
 
-	// Makes an offer with an hourly rate and the number of estimated ours for a case
-	// pre: case must in awaiting arbs status
-	// auth: arbitrator
-	ACTION makeoffer(uint64_t case_id, int64_t offer_id, name arbitrator, asset hourly_rate, uint8_t estimated_hours);
-
-	// Dismiss an offer made for a case
-	// pre: case must in awaiting arbs status and offer not accepted nor declined yet
-	// auth: arbitrator
-	ACTION dismissoffer(uint64_t case_id, uint64_t offer_id);
-
 	// Set the different languages the arbitrator will handle cases
 	// auth: arbitrator
 	ACTION setlangcodes(name arbitrator, vector<uint16_t> lang_codes);
-
-	// Set a new arbitrator status
-	// auth: arbitrator
-	ACTION newarbstatus(name arbitrator, uint8_t new_status);
 
 	// Recuse from a case
 	// post: Case is considered void and mistrial status is set
@@ -386,28 +327,6 @@ public:
 #pragma endregion System Structs
 
 #pragma region Tables and Structs
-
-	/**
-	 * Holds all currently elected arbitrators.
-	 * @scope get_self().value
-	 * @key uint64_t arb.value
-	 */
-	TABLE arbitrator
-	{
-		name arb;
-		uint8_t arb_status;
-		vector<uint64_t> open_case_ids;
-		vector<uint64_t> closed_case_ids;
-		vector<uint64_t> recused_case_ids;
-		string credentials_link; // NOTE: ipfs_url of arbitrator credentials
-		time_point_sec elected_time;
-		time_point_sec term_expiration;
-		vector<uint16_t> languages; // NOTE: language codes
-
-		uint64_t primary_key() const { return arb.value; }
-		EOSLIB_SERIALIZE(arbitrator, (arb)(arb_status)(open_case_ids)(closed_case_ids)(recused_case_ids)(credentials_link)(elected_time)(term_expiration)(languages))
-	};
-	typedef multi_index<name("arbitrators"), arbitrator> arbitrators_table;
 
 	// NOTE: Stores all information related to a single claim.
 	TABLE claim
@@ -475,38 +394,15 @@ public:
 	{
 		name admin;
 		string contract_version;
-		uint16_t max_elected_arbs = 21;
-		uint32_t election_voting_ts = 2505600; // 29 days
-		uint32_t runoff_election_voting_ts = 604800;
-		uint32_t election_add_candidates_ts = 604800;		// 7 days
-		uint32_t arb_term_length = 31536000;						// 365 days
-		uint32_t claimant_accepting_offers_ts = 604800; // 7 days
-		uint64_t current_election_id;
+
 		uint8_t max_claims_per_case = 21;
 		asset fee_usd = asset(100000, USD_SYM);
 		asset available_funds = asset(0, TLOS_SYM);
 		asset reserved_funds = asset(0, TLOS_SYM);
 
-		EOSLIB_SERIALIZE(config, (admin)(contract_version)(max_elected_arbs)(election_voting_ts)(runoff_election_voting_ts)(election_add_candidates_ts)(arb_term_length)(claimant_accepting_offers_ts)(current_election_id)(max_claims_per_case)(fee_usd)(available_funds)(reserved_funds))
+		EOSLIB_SERIALIZE(config, (admin)(contract_version)(max_claims_per_case)(fee_usd)(available_funds)(reserved_funds))
 	};
 	typedef singleton<name("config"), config> config_singleton;
-
-	/**
-	 * Holds instances of joinder cases.
-	 * @scope get_self().value
-	 * @key uint64_t join_id
-	 */
-	TABLE joinder
-	{
-		uint64_t join_id;
-		vector<uint64_t> cases;
-		uint32_t join_time;
-		name joined_by;
-
-		uint64_t primary_key() const { return join_id; }
-		EOSLIB_SERIALIZE(joinder, (join_id)(cases)(join_time)(joined_by))
-	};
-	typedef multi_index<name("joinedcases"), joinder> joinders_table;
 
 	// scope: account name
 	TABLE account
@@ -518,12 +414,6 @@ public:
 	};
 	typedef multi_index<name("accounts"), account> accounts_table;
 
-	typedef multi_index<name("offers"), offer,
-											indexed_by<name("byarb"), const_mem_fun<offer, uint64_t, &offer::by_arbitrator>>,
-											indexed_by<name("bycase"), const_mem_fun<offer, uint64_t, &offer::by_case>>,
-											indexed_by<name("bycasearb"), const_mem_fun<offer, uint128_t, &offer::by_case_and_arbitrator>>>
-			offers_table;
-
 #pragma endregion Tables and Structs
 
 #pragma region Helpers
@@ -531,12 +421,6 @@ public:
 	void validate_ipfs_url(string ipfs_url);
 
 	void assert_string(string to_check, string error_msg);
-
-	void start_new_election(uint8_t available_seats, bool runoff, string content);
-
-	bool has_available_seats(arbitrators_table & arbitrators, uint8_t & available_seats);
-
-	void add_arbitrator(arbitrators_table & arbitrators, name arb_name, std::string credential_link);
 
 	bool all_claims_resolved(uint64_t case_id);
 
@@ -564,9 +448,6 @@ public:
 #pragma region Notification_handlers
 
 	[[eosio::on_notify("eosio.token::transfer")]] void transfer_handler(name from, name to, asset quantity, string memo);
-
-	// catches broadcast notification from decide
-	[[eosio::on_notify("telos.decide::broadcast")]] void catch_broadcast(name ballot_name, map<name, asset> final_results, uint32_t total_voters);
 
 #pragma endregion Notification_handlers
 

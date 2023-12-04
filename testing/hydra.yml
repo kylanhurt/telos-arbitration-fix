@@ -4,11 +4,6 @@ contracts:
     fixturesDir: tests/fixtures/arbitration
     name: arbitration
     wasm: contracts_source/arbitration/arbitration.wasm
-  telos.decide:
-    abi: contracts_source/telos.decide/telos.decide.abi
-    fixturesDir: tests/fixtures/telos.decide
-    name: telos.decide
-    wasm: contracts_source/telos.decide/telos.decide.wasm
   delphioracle:
     abi: contracts_source/delphioracle/delphioracle.abi
     fixturesDir: tests/fixtures/delphioracle
