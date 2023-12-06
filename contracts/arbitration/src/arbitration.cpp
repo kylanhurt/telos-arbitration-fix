@@ -65,8 +65,7 @@ void arbitration::setversion(string new_version)
     configs.set(conf, get_self());
 }
 
-void arbitration::setconfig(uint8_t max_claims_per_case, 
-	asset fee_usd)
+void arbitration::setconfig(uint8_t max_claims_per_case, asset fee_usd)
 {
 	//open config singleton, get config
     config_singleton configs(get_self(), get_self().value);
