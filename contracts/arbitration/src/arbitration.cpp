@@ -308,19 +308,6 @@ void arbitration::readycase(uint64_t case_id, name claimant)
 	check(cf.case_status == case_status::CASE_SETUP, "Cases can only be readied during CASE_SETUP");
 	check(claimant == cf.claimant, "you are not the claimant of this case.");
 	check(cf.number_claims >= 1, "Cases must have at least one claim");
-	
-	//Get the TLOS-USD conversion through delphioracle
-	auto tlosusd = tlosusdprice();
-
-	//Calculates the fee amount the claimant needs to pay in TLOS to ready the case and substract that balance from his account
-	float tlos_fee_amount = float(conf.fee_usd.amount*10000 / tlosusd);
-    auto tlos_fee = asset(tlos_fee_amount, TLOS_SYM);
-	sub_balance(claimant, tlos_fee);
-
-	//The fee amount will be added to the reserved funds, because in some scenarios it might be returned
-	//In particular, the fee will be returned in the case that there's a mistrial, case is dismissed or claimant decides to cancel a case 
-	//before any arbitator makes an offer
-	conf.reserved_funds += tlos_fee;
 		
 	configs.set(conf, get_self());
 
@@ -328,7 +315,6 @@ void arbitration::readycase(uint64_t case_id, name claimant)
 	casefiles.modify(cf, get_self(), [&](auto &col) {
 		col.case_status = static_cast<uint8_t>(case_status::AWAITING_ARBS);
 		col.update_ts = time_point_sec(current_time_point());
-		col.fee_paid_tlos = tlos_fee;
 	});
 }
 
@@ -447,15 +433,6 @@ void arbitration::startcase(uint64_t case_id, name assigned_arb, uint8_t number_
 	}
 	
 	//Update the open cases for the corresponding arbitrator
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	const auto& arb = arbitrators.get(assigned_arb.value);
-
-	vector<uint64_t> new_open_cases = arb.open_case_ids;
-	new_open_cases.emplace_back(case_id);
-
-	arbitrators.modify(arb, same_payer, [&](auto &col) {
-		col.open_case_ids = new_open_cases;
-	});
 
 }
 
@@ -586,29 +563,6 @@ void arbitration::setruling(uint64_t case_id, name assigned_arb, string case_rul
 
 #pragma endregion Case_Actions
 
-#pragma region Arb_Actions
-
-void arbitration::setlangcodes(name arbitrator, vector<uint16_t> lang_codes)
-{	
-	//authenticate
-	require_auth(arbitrator);
-
-	//open arbitrator table and checks that the arbitrator exists
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	const auto& arb = arbitrators.get(arbitrator.value, "Arbitrator not found");
-
-	//If the seat has expired or is removed, or if the term has expired, the arbitrator can not set a lang codes
-	check(arb.arb_status != arb_status::SEAT_EXPIRED && arb.arb_status != arb_status::REMOVED, "Arbitrator must be active");
-	check(time_point_sec(current_time_point()) < arb.term_expiration, "Arbitrator term expired");
-
-	//Update the arbitrator lang codes
-	arbitrators.modify(arb, same_payer, [&](auto& a) {
-		a.languages = lang_codes;
-	});
-}
-
-#pragma endregion Arb_Actions
-
 #pragma region BP_Actions
 
 void arbitration::closecase(uint64_t case_id) {
@@ -630,25 +584,6 @@ void arbitration::closecase(uint64_t case_id) {
 	casefiles.modify(cf, same_payer, [&](auto& col) {
 		col.case_status = static_cast<uint8_t>(case_status::RESOLVED);
 		col.update_ts = time_point_sec(current_time_point());
-	});
-
-	//open arbitrators table, get arbitrator
-	arbitrators_table arbitrators(get_self(), get_self().value);
-	const auto& arb = arbitrators.get(cf.arbitrators[0].value);
-
-	//Update open and closed cases in the arbitrator table
-	vector<uint64_t> new_open_cases = arb.open_case_ids;
-	vector<uint64_t> new_closed_cases = arb.closed_case_ids;
-
-    const auto case_itr = std::find(new_open_cases.begin(), new_open_cases.end(), case_id);
-	if(case_itr != new_open_cases.end()) {
-		new_open_cases.erase(case_itr);
-	}
-	new_closed_cases.emplace_back(case_id);
-
-	arbitrators.modify(arb, same_payer, [&](auto &col) {
-		col.open_case_ids = new_open_cases;
-		col.closed_case_ids = new_closed_cases;
 	});
 }
 
@@ -689,23 +624,7 @@ void arbitration::validatecase(uint64_t case_id, bool proceed)
 		configs.set(conf, get_self());
 
 		//open arbitrators table, get arbitrator
-		arbitrators_table arbitrators(get_self(), get_self().value);
-		const auto& arb = arbitrators.get(cf.arbitrators[0].value);
 
-		//Update open and closed cases in the arbitrator table
-		vector<uint64_t> new_open_cases = arb.open_case_ids;
-		vector<uint64_t> new_closed_cases = arb.closed_case_ids;
-
-		const auto case_itr = std::find(new_open_cases.begin(), new_open_cases.end(), case_id);
-		if(case_itr != new_open_cases.end()) {
-			new_open_cases.erase(case_itr);
-		}
-		new_closed_cases.emplace_back(case_id);
-
-		arbitrators.modify(arb, same_payer, [&](auto &col) {
-			col.open_case_ids = new_open_cases;
-			col.closed_case_ids = new_closed_cases;
-		});
 	}
 
 	//Update casefile

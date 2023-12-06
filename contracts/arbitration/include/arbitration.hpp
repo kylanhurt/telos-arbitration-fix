@@ -11,12 +11,10 @@
 #include <eosio/eosio.hpp>
 #include <eosio/permission.hpp>
 #include <eosio/singleton.hpp>
-#include "delphioracle-interface.hpp"
 #include "eosiosystem-interface.hpp"
 
 using namespace std;
 using namespace eosio;
-using namespace delphioracle;
 using namespace eosiosystem;
 
 CONTRACT arbitration : public eosio::contract
