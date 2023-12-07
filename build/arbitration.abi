@@ -1,0 +1,616 @@
+{
+    "____comment": "This file was generated with eosio-abigen. DO NOT EDIT ",
+    "version": "eosio::abi/1.2",
+    "types": [],
+    "structs": [
+        {
+            "name": "account",
+            "base": "",
+            "fields": [
+                {
+                    "name": "balance",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "addclaim",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claim_link",
+                    "type": "string"
+                },
+                {
+                    "name": "claimant",
+                    "type": "name"
+                },
+                {
+                    "name": "claim_category",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "cancelcase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "casefile",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "case_status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "claimant",
+                    "type": "name"
+                },
+                {
+                    "name": "respondant",
+                    "type": "name"
+                },
+                {
+                    "name": "arbitrators",
+                    "type": "name[]"
+                },
+                {
+                    "name": "approvals",
+                    "type": "name[]"
+                },
+                {
+                    "name": "number_claims",
+                    "type": "uint8"
+                },
+                {
+                    "name": "required_langs",
+                    "type": "uint16[]"
+                },
+                {
+                    "name": "case_ruling",
+                    "type": "string"
+                },
+                {
+                    "name": "fee_paid_tlos",
+                    "type": "asset"
+                },
+                {
+                    "name": "update_ts",
+                    "type": "time_point_sec"
+                }
+            ]
+        },
+        {
+            "name": "claim",
+            "base": "",
+            "fields": [
+                {
+                    "name": "claim_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claim_summary",
+                    "type": "string"
+                },
+                {
+                    "name": "decision_link",
+                    "type": "string"
+                },
+                {
+                    "name": "response_link",
+                    "type": "string"
+                },
+                {
+                    "name": "claimant_limit_time",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "claim_info_needed",
+                    "type": "bool"
+                },
+                {
+                    "name": "claim_info_required",
+                    "type": "string"
+                },
+                {
+                    "name": "respondant_limit_time",
+                    "type": "time_point_sec"
+                },
+                {
+                    "name": "response_info_needed",
+                    "type": "bool"
+                },
+                {
+                    "name": "response_info_required",
+                    "type": "string"
+                },
+                {
+                    "name": "status",
+                    "type": "uint8"
+                },
+                {
+                    "name": "claim_category",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "closecase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
+            "name": "config",
+            "base": "",
+            "fields": [
+                {
+                    "name": "admin",
+                    "type": "name"
+                },
+                {
+                    "name": "contract_version",
+                    "type": "string"
+                },
+                {
+                    "name": "max_claims_per_case",
+                    "type": "uint8"
+                },
+                {
+                    "name": "fee_usd",
+                    "type": "asset"
+                },
+                {
+                    "name": "available_funds",
+                    "type": "asset"
+                },
+                {
+                    "name": "reserved_funds",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "filecase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "claimant",
+                    "type": "name"
+                },
+                {
+                    "name": "claim_link",
+                    "type": "string"
+                },
+                {
+                    "name": "lang_codes",
+                    "type": "uint16[]"
+                },
+                {
+                    "name": "respondant",
+                    "type": "name?"
+                },
+                {
+                    "name": "claim_category",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "init",
+            "base": "",
+            "fields": [
+                {
+                    "name": "initial_admin",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "readycase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claimant",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "removeclaim",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claim_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claimant",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "respond",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claim_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "respondant",
+                    "type": "name"
+                },
+                {
+                    "name": "response_link",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "reviewclaim",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claim_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assigned_arb",
+                    "type": "name"
+                },
+                {
+                    "name": "claim_info_needed",
+                    "type": "bool"
+                },
+                {
+                    "name": "claim_info_required",
+                    "type": "string"
+                },
+                {
+                    "name": "response_info_needed",
+                    "type": "bool"
+                },
+                {
+                    "name": "response_info_required",
+                    "type": "string"
+                },
+                {
+                    "name": "number_days_claimant",
+                    "type": "uint8"
+                },
+                {
+                    "name": "number_days_respondant",
+                    "type": "uint8"
+                }
+            ]
+        },
+        {
+            "name": "setadmin",
+            "base": "",
+            "fields": [
+                {
+                    "name": "new_admin",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "setconfig",
+            "base": "",
+            "fields": [
+                {
+                    "name": "max_claims_per_case",
+                    "type": "uint8"
+                },
+                {
+                    "name": "fee_usd",
+                    "type": "asset"
+                }
+            ]
+        },
+        {
+            "name": "setruling",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assigned_arb",
+                    "type": "name"
+                },
+                {
+                    "name": "case_ruling",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "settleclaim",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assigned_arb",
+                    "type": "name"
+                },
+                {
+                    "name": "claim_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "accept",
+                    "type": "bool"
+                },
+                {
+                    "name": "decision_link",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "setversion",
+            "base": "",
+            "fields": [
+                {
+                    "name": "new_version",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "shredcase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claimant",
+                    "type": "name"
+                }
+            ]
+        },
+        {
+            "name": "startcase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "assigned_arb",
+                    "type": "name"
+                },
+                {
+                    "name": "number_days_respondant",
+                    "type": "uint8"
+                },
+                {
+                    "name": "response_info_required",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "updateclaim",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claim_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "claimant",
+                    "type": "name"
+                },
+                {
+                    "name": "claim_link",
+                    "type": "string"
+                }
+            ]
+        },
+        {
+            "name": "validatecase",
+            "base": "",
+            "fields": [
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                },
+                {
+                    "name": "proceed",
+                    "type": "bool"
+                }
+            ]
+        },
+        {
+            "name": "withdraw",
+            "base": "",
+            "fields": [
+                {
+                    "name": "owner",
+                    "type": "name"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "addclaim",
+            "type": "addclaim",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "cancelcase",
+            "type": "cancelcase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "closecase",
+            "type": "closecase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "filecase",
+            "type": "filecase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "init",
+            "type": "init",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "readycase",
+            "type": "readycase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "removeclaim",
+            "type": "removeclaim",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "respond",
+            "type": "respond",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "reviewclaim",
+            "type": "reviewclaim",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setadmin",
+            "type": "setadmin",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setconfig",
+            "type": "setconfig",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setruling",
+            "type": "setruling",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "settleclaim",
+            "type": "settleclaim",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "setversion",
+            "type": "setversion",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "shredcase",
+            "type": "shredcase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "startcase",
+            "type": "startcase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "updateclaim",
+            "type": "updateclaim",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "validatecase",
+            "type": "validatecase",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "withdraw",
+            "type": "withdraw",
+            "ricardian_contract": ""
+        }
+    ],
+    "tables": [
+        {
+            "name": "accounts",
+            "type": "account",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "casefiles",
+            "type": "casefile",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "claims",
+            "type": "claim",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        },
+        {
+            "name": "config",
+            "type": "config",
+            "index_type": "i64",
+            "key_names": [],
+            "key_types": []
+        }
+    ],
+    "kv_tables": {},
+    "ricardian_clauses": [],
+    "variants": [],
+    "action_results": []
+}

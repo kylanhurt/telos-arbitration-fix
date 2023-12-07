@@ -341,16 +341,6 @@ void arbitration::cancelcase(uint64_t case_id) {
 
 	//Substract the fee paid by the claimant from the reserved funds
 	conf.reserved_funds -= cf.fee_paid_tlos;
-
-	//If there are no offers made, the fee will be returned to the claimant
-	//Otherwise, the funds will be added to the available funds
-	if(cf.number_offers == 0) {
-		add_balance(cf.claimant, cf.fee_paid_tlos, get_self());
-		configs.set(conf, get_self());
-	} else {
-		conf.available_funds += cf.fee_paid_tlos;
-		configs.set(conf, get_self());
-	}
 };
 
 #pragma endregion Claimant_Actions
@@ -557,7 +547,7 @@ void arbitration::setruling(uint64_t case_id, name assigned_arb, string case_rul
 		col.update_ts = time_point_sec(current_time_point());
 	});
 
-	notify_bp_accounts();
+	// notify_bp_accounts();
 }
 
 #pragma endregion Case_Actions
@@ -605,17 +595,14 @@ void arbitration::validatecase(uint64_t case_id, bool proceed)
 	//BPs can decide either to proceed or dismiss the case if they consider that the arbitrator ruling isn't valid
 	if(proceed) {
 		//Remove the arbitrator cost and the fee from reserved funds, and add the fee to available funds.
-		conf.reserved_funds -= cf.arbitrator_cost_tlos + cf.fee_paid_tlos;
+		conf.reserved_funds -= cf.fee_paid_tlos;
 		conf.available_funds += cf.fee_paid_tlos;
 		configs.set(conf, get_self());
-
-		//Add to the arbitrator balance the corresponding rate cost paid by the claimant
-		add_balance(cf.arbitrators[0], cf.arbitrator_cost_tlos, get_self());
 
 	} else {
 		//If the case is considered not valid, return the fee paid and the arbitrator 
 		//rate cost to the claimant, since the case is considered mistrial
-		auto tlos_returned = cf.fee_paid_tlos + cf.arbitrator_cost_tlos;
+		auto tlos_returned = cf.fee_paid_tlos;
 		add_balance(cf.claimant, tlos_returned, get_self());
 
 		//Remove the telos returned from reserved funds

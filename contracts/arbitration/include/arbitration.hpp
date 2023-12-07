@@ -24,12 +24,13 @@ public:
 	using contract::contract;
 	static constexpr symbol TLOS_SYM = symbol("TLOS", 4);
 	static constexpr symbol VOTE_SYM = symbol("VOTE", 4);
-	static constexpr symbol USD_SYM = symbol("USD", 4);
+	static constexpr symbol USD_SYM = symbol("USD", 4);	
 
 #pragma region Enums
 
 	// TODO: describe each enum in README
 
+	// kylan: adjust
 	enum class case_status : uint8_t
 	{
 		CASE_SETUP = 0,
@@ -68,14 +69,6 @@ public:
 	{
 		return a >= static_cast<uint8_t>(b);
 	}
-
-	enum class offer_status : uint8_t
-	{
-		PENDING = 1,
-		ACCEPTED = 2,
-		REJECTED = 3,
-		DISMISSED = 4,
-	};
 
 	enum class claim_status : uint8_t
 	{
@@ -122,19 +115,6 @@ public:
 	{
 		return a <= static_cast<uint8_t>(b);
 	}
-
-	enum class lang_code : uint16_t
-	{
-		ENGL = 0, // English
-		FRCH = 1, // French
-		GRMN = 2, // German
-		KREA = 3, // Korean
-		JAPN = 4, // Japanese
-		CHNA = 5, // Chinese
-		SPAN = 6, // Spanish
-		PGSE = 7, // Portuguese
-		SWED = 8	// Swedish
-	};
 
 #pragma endregion Enums
 
@@ -261,11 +241,11 @@ public:
 	// pre: case must not be enforced yet
 	// post: Case is considered void and mistrial status is set
 	// auth: admin
-	ACTION forcerecusal(uint64_t case_id, string rationale, name arbitrator);
+	// ACTION forcerecusal(uint64_t case_id, string rationale, name arbitrator);
 
 	// Dismiss an arbitrator from all his cases
 	// auth: admin
-	ACTION dismissarb(name arbitrator, bool remove_from_cases);
+	// ACTION dismissarb(name arbitrator, bool remove_from_cases);
 
 #pragma endregion BP_Actions
 
@@ -273,12 +253,12 @@ public:
 
 	// Set the different languages the arbitrator will handle cases
 	// auth: arbitrator
-	ACTION setlangcodes(name arbitrator, vector<uint16_t> lang_codes);
+	// ACTION setlangcodes(name arbitrator, vector<uint16_t> lang_codes);
 
 	// Recuse from a case
 	// post: Case is considered void and mistrial status is set
 	// auth: arbitrator
-	ACTION recuse(uint64_t case_id, string rationale, name assigned_arb);
+	// ACTION recuse(uint64_t case_id, string rationale, name assigned_arb);
 
 #pragma endregion Arb_Actions
 
@@ -361,13 +341,10 @@ public:
 		vector<name> arbitrators;
 		vector<name> approvals;
 		uint8_t number_claims;
-		uint8_t number_offers;
 		vector<uint16_t> required_langs;
 		string case_ruling;
 		asset fee_paid_tlos = asset(0, TLOS_SYM);
-		asset arbitrator_cost_tlos = asset(0, TLOS_SYM);
 		time_point_sec update_ts;
-		time_point_sec sending_offers_until_ts;
 
 		uint64_t primary_key() const { return case_id; }
 
@@ -379,7 +356,7 @@ public:
 			return (claimant_id << 64) | respondant_id;
 		}
 
-		EOSLIB_SERIALIZE(casefile, (case_id)(case_status)(claimant)(respondant)(arbitrators)(approvals)(number_claims)(number_offers)(required_langs)(case_ruling)(fee_paid_tlos)(arbitrator_cost_tlos)(update_ts)(sending_offers_until_ts))
+		EOSLIB_SERIALIZE(casefile, (case_id)(case_status)(claimant)(respondant)(arbitrators)(approvals)(number_claims)(case_ruling)(fee_paid_tlos)(update_ts))
 	};
 	typedef multi_index<name("casefiles"), casefile> casefiles_table;
 
@@ -439,19 +416,19 @@ public:
 
 	uint64_t tlosusdprice();
 
-	void notify_bp_accounts();
+	// void notify_bp_accounts();
 
 #pragma endregion Helpers
 
 #pragma region Notification_handlers
 
-	[[eosio::on_notify("eosio.token::transfer")]] void transfer_handler(name from, name to, asset quantity, string memo);
+	// [[eosio::on_notify("eosio.token::transfer")]] void transfer_handler(name from, name to, asset quantity, string memo);
 
 #pragma endregion Notification_handlers
 
 #pragma region Test_Actions
 
-	ACTION skiptovoting();
+	// ACTION skiptovoting();
 
 #pragma endregion Test_Actions
 };

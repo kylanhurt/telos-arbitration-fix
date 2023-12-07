@@ -933,53 +933,6 @@ BOOST_FIXTURE_TEST_CASE( assign_arb_flow, eosio_arb_tester ) try {
 
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( transfer_handler_integrity, eosio_arb_tester ) try {
-	auto tlos_transfer_amount = asset::from_string("400.0000 TLOS");
-	transfer(N(eosio), claimant.value, tlos_transfer_amount, "claimant initial eosio.token balance");
-
-	//balance check from token contract
-	auto balance = get_currency_balance(N(eosio.token), symbol(4, "TLOS"), claimant.value);
-	BOOST_REQUIRE_EQUAL(balance, tlos_transfer_amount);
-
-	//balance check from arb contract
-	transfer(claimant.value, N(eosio.arb), tlos_transfer_amount, "claimant initial eosio.arb balance");
-	balance = get_currency_balance(N(eosio.arb), symbol(4, "TLOS"), claimant.value);
-	BOOST_REQUIRE_EQUAL(balance, tlos_transfer_amount);
-
-	create(N(eosio), asset::from_string("10000000000.0000 PETER"));
-	issue(N(eosio), N(eosio), asset::from_string("1000000000.0000 PETER"), "Initial amount!");
-
-	auto custom_transfer_balance = asset::from_string("400.0000 PETER");
-	transfer(N(eosio), claimant.value, custom_transfer_balance, "claimant initial custom eosio.token balance");
-
-	//custom balance check from token contract
-	balance = get_currency_balance(N(eosio.token), symbol(4, "PETER"), claimant.value);
-	BOOST_REQUIRE_EQUAL(balance, custom_transfer_balance);
-
-	BOOST_REQUIRE_EXCEPTION(
-		transfer(claimant.value, N(eosio.arb), custom_transfer_balance, "claimant initial custom eosio.arb balance"),
-		eosio_assert_message_exception,
-		eosio_assert_message_is("only TLOS tokens are accepted by this contract")
-    );
-
-	withdraw(claimant);
-	produce_blocks();
-
-	// token balance check from arb contract, should be 0
-	balance = get_currency_balance(N(eosio.arb), symbol(4, "TLOS"), claimant.value);
-	BOOST_REQUIRE_EQUAL(balance, asset::from_string("0.0000 TLOS"));
-
-	// token balance check from token contract, should be 400.0000 TLOS
-	balance = get_currency_balance(N(eosio.token), symbol(4, "TLOS"), claimant.value);
-	BOOST_REQUIRE_EQUAL(balance, tlos_transfer_amount);
-
-	BOOST_REQUIRE_EXCEPTION(
-		withdraw(claimant),
-		eosio_assert_message_exception,
-		eosio_assert_message_is("balance does not exist")
-    );
-} FC_LOG_AND_RETHROW()
-
 BOOST_FIXTURE_TEST_CASE( advance_case, eosio_arb_tester ) try {
 	elect_arbitrators(8, 10); // test_voters 0-7 are arbitrators, 8-17 voted for 0-7
 	newarbstatus(AVAILABLE, test_voters[0]);
