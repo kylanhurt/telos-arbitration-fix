@@ -629,8 +629,8 @@ typedef arbitration::claim claim;
 
 void arbitration::validate_ipfs_url(string ipfs_url)
 {
-	//Check that ipfs_url is a valid ipfs HASH
-	check(ipfs_url.length() == 46 || ipfs_url.length() == 49, "invalid ipfs string, valid schema: <hash>");
+	//Check that ipfs_url is a valid link
+	check(ipfs_url.find('http') != std::string::npos, 'IPFS URL must include "http"');
 }
 
 void arbitration::assert_string(string to_check, string error_msg)
