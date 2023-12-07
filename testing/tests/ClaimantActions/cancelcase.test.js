@@ -52,17 +52,10 @@ describe("Cancel Case Telos Arbitration Smart Contract Tests", () => {
                 {
                     "contract_version": "0.1.0",
                     "admin": "admin",
-                    "max_elected_arbs": 2,
-                    "election_voting_ts": 2505600,
-                    "runoff_election_voting_ts": 604800,
-                    "election_add_candidates_ts": 604800,
-                    "arb_term_length": 31536000,
-                    "current_election_id": "0",
-                    "available_funds": "5.0000 TLOS",
-                    "reserved_funds": "50.0000 TLOS",
-                    "max_claims_per_case": 10,
                     "fee_usd": "10.0000 USD",
-                    "claimant_accepting_offers_ts": 604800,
+                    "available_funds": "15.0000 TLOS",
+                    "reserved_funds": "100.0000 TLOS",
+                    "max_claims_per_case": 21
 
                 }
             ]

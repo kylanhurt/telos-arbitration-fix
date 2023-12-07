@@ -34,19 +34,12 @@ describe("Init Telos Arbitration Smart Contract Tests", () => {
         })
 
         expect(arbitration.getTableRowsScoped("config")["arbitration"][0]).toEqual({
-            contract_version: "0.1.0",
-            admin: "admin",
-            max_elected_arbs: 21,
-            election_voting_ts: 2505600,
-            runoff_election_voting_ts: 604800,
-            election_add_candidates_ts: 604800,
-            arb_term_length: 31536000,
-            current_election_id: "0",
-            available_funds: "0.0000 TLOS",
-            max_claims_per_case: 21,
-            claimant_accepting_offers_ts: 604800,
-            fee_usd: "10.0000 USD",
-            reserved_funds: "0.0000 TLOS",
+            "contract_version": "0.1.0",
+            "admin": "admin",
+            "fee_usd": "10.0000 USD",
+            "available_funds": "15.0000 TLOS",
+            "reserved_funds": "100.0000 TLOS",
+            "max_claims_per_case": 21
         });
     });
 

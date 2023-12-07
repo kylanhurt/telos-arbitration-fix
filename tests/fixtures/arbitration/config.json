@@ -1,19 +1,12 @@
 {
     "scope": [
         {
-            "admin": "user1",
-            "contract_version": "string",
-            "max_elected_arbs": 123,
-            "election_voting_ts": 123,
-            "runoff_election_voting_ts": 123,
-            "election_add_candidates_ts": 123,
-            "arb_term_length": 123,
-            "claimant_accepting_offers_ts": 123,
-            "current_election_id": "123456",
-            "max_claims_per_case": 123,
-            "fee_usd": "1.2345 EOS",
-            "available_funds": "1.2345 EOS",
-            "reserved_funds": "1.2345 EOS"
+            "contract_version": "0.1.0",
+            "admin": "admin",
+            "fee_usd": "10.0000 USD",
+            "available_funds": "15.0000 TLOS",
+            "reserved_funds": "100.0000 TLOS",
+            "max_claims_per_case": 21
         }
     ]
 }

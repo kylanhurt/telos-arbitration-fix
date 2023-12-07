@@ -4,7 +4,8 @@
   "description": "Testing arbitration smart contract with Hydra",
   "main": "",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "pre-test": "cp build/arbitration.abi testing/contracts_source/arbitration && cp build/arbitration.wasm testing/contracts_source/arbitration"
   },
   "dependencies": {
     "@klevoya/hydra": "*",
