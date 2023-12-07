@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <eosio/action.hpp>
+#include "./action.hpp"
 #include <eosio/asset.hpp>
 #include <eosio/eosio.hpp>
 #include <eosio/permission.hpp>
