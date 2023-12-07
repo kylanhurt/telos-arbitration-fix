@@ -179,7 +179,7 @@ There is no time limit for the claimant to respond to an offer. However, since t
 
 **Note**: If the case didn't receive any offer before cancelling, the fee will be returned to the claimant. Otherwise, the fee will be kept and added to available funds.
 
-If an offer is accepted, the case will be moved to `ARBS_ASSIGNED`
+If an offer is accepted, the case will be moved to `ARB_ASSIGNED`
 
 ### Case Management
 
@@ -290,5 +290,5 @@ The admin will also have the power of dismiss an arbitrator from his position by
 
 * `DISMISSED` : If during the DECISION stage the case is found to be invalid or having a non-sense ruling, the Block Producers may move the case to DISMISSED stage. In this scenario, all the funds (the fee + the arbitrator rate cost) will be returned to the claimant.
 
-* `MISTRIAL` : If during the ARBS_ASSIGNED, CASE_INVESTIGATION or DECISION stage the arbitrator recuses (or is forced to recuse), the case will be considered a MISTRIAL and all the funds (the fee + the arbitrator rate cost) will be returned to the claimant.
+* `MISTRIAL` : If during the ARB_ASSIGNED, CASE_INVESTIGATION or DECISION stage the arbitrator recuses (or is forced to recuse), the case will be considered a MISTRIAL and all the funds (the fee + the arbitrator rate cost) will be returned to the claimant.
 

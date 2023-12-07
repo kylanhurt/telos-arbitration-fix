@@ -329,7 +329,7 @@ void arbitration::cancelcase(uint64_t case_id) {
 	const auto& cf = casefiles.get(case_id, "Case not found");
 
 	//A case can only be canceled while it is in awaiting arbs status
-	check(cf.case_status == case_status::ARBS_ASSIGNED, "Case status must be in ARBS_ASSIGNED stage");
+	check(cf.case_status == case_status::ARB_ASSIGNED, "Case status must be in ARB_ASSIGNED stage");
 
 	//authenticate
 	require_auth(cf.claimant);
@@ -420,7 +420,7 @@ void arbitration::startcase(uint64_t case_id, name assigned_arb, uint8_t number_
 	check(assigned_arb != cf.arbitrator, "Only an assigned arbitrator can start a case");
 	
 	//Check that the case in arbs assigned status
-	check(cf.case_status == case_status::ARBS_ASSIGNED, "Case status must be in ARBS_ASSIGNED");
+	check(cf.case_status == case_status::ARB_ASSIGNED, "Case status must be in ARB_ASSIGNED");
 	
 	//Update casefile
 	casefiles.modify(cf, get_self(), [&](auto &col) {
@@ -582,7 +582,7 @@ void arbitration::arbacceptnom(name arbitrator, uint64_t case_id)
 	check(cf.case_status == case_status::AWAITING_ARB_ACCEPT, "case status does NOT allow arbitrator accepting case at this time");	
 
 	casefiles.modify(cf, get_self(), [&](auto &col) {
-		col.case_status = static_cast<uint8_t>(case_status::ARBS_ASSIGNED);
+		col.case_status = static_cast<uint8_t>(case_status::ARB_ASSIGNED);
 		col.update_ts = time_point_sec(current_time_point());
 	});
 }

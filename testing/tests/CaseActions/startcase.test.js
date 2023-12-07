@@ -210,7 +210,7 @@ describe("Starts case Telos Arbitration Smart Contract Tests", () => {
             [{
               actor: user3.accountName,
               permission: "active"
-            }])).rejects.toThrow("Case status must be in ARBS_ASSIGNED");
+            }])).rejects.toThrow("Case status must be in ARB_ASSIGNED");
     });
     
     it("fails if user other than arb tries to start a case", async () => {

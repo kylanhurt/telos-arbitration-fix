@@ -35,7 +35,7 @@ public:
 	// {
 	// 	CASE_SETUP = 0,
 	// 	AWAITING_ARBS = 1,
-	// 	ARBS_ASSIGNED = 2,
+	// 	ARB_ASSIGNED = 2,
 	// 	CASE_INVESTIGATION = 3,
 	// 	DECISION = 4,
 	// 	ENFORCEMENT = 5,
@@ -49,7 +49,7 @@ public:
 	{
 		CASE_SETUP = 0,
 		AWAITING_ARB_ACCEPT = 1,
-		ARBS_ASSIGNED = 2,
+		ARB_ASSIGNED = 2,
 		CASE_INVESTIGATION = 3,
 		DECISION = 4,
 		ENFORCEMENT = 5,
@@ -214,7 +214,7 @@ public:
 #pragma region Case_Actions
 
 	// Starts the case investigation period
-	// pre: case must be in arbs_assigned status
+	// pre: case must be in ARB_ASSIGNED status
 	// auth: assigned arbitrator
 	ACTION startcase(uint64_t case_id, name assigned_arb, uint8_t number_days_respondant, string response_info_required);
 
