@@ -48,16 +48,15 @@ public:
 	enum class case_status : uint8_t
 	{
 		CASE_SETUP = 0,
-		AWAITING_RESP_ACCEPT_ARB = 1,
-		AWAITING_ARB_ACCEPT = 2,
-		ARBS_ASSIGNED = 3,
-		CASE_INVESTIGATION = 4,
-		DECISION = 5,
-		ENFORCEMENT = 6,
-		RESOLVED = 7,
-		DISMISSED = 8,
-		CANCELLED = 9,
-		MISTRIAL = 10,
+		AWAITING_ARB_ACCEPT = 1,
+		ARBS_ASSIGNED = 2,
+		CASE_INVESTIGATION = 3,
+		DECISION = 4,
+		ENFORCEMENT = 5,
+		RESOLVED = 6,
+		DISMISSED = 7,
+		CANCELLED = 8,
+		MISTRIAL = 9,
 	};	
 
 	friend constexpr bool operator==(const uint8_t &a, const case_status &b)
@@ -203,6 +202,7 @@ public:
 #pragma endregion Claimant_Actions
 
 #pragma region Respondant_Actions
+	ACTION acceptarb(name respondant, uint64_t case_id);
 
 	// Allows the respondant to respond to a claim
 	// pre: case must be in investigation status

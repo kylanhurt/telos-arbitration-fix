@@ -313,7 +313,7 @@ void arbitration::readycase(uint64_t case_id, name claimant)
 
 	//Update casefile table
 	casefiles.modify(cf, get_self(), [&](auto &col) {
-		col.case_status = static_cast<uint8_t>(case_status::AWAITING_RESP_ACCEPT_ARB);
+		col.case_status = static_cast<uint8_t>(case_status::AWAITING_ARB_ACCEPT);
 		col.update_ts = time_point_sec(current_time_point());
 	});
 }
@@ -347,6 +347,26 @@ void arbitration::cancelcase(uint64_t case_id) {
 #pragma endregion Claimant_Actions
 
 #pragma region Respondant_Actions
+
+void arbitration::acceptarb(name respondant, uint64_t case_id)
+{
+	//authenticate
+	require_auth(respondant);
+
+	//open casefile tables and checks that the case exists
+	casefiles_table casefiles(get_self(), get_self().value);
+	const auto& cf = casefiles.get(case_id, "Case not found");
+
+	//Only respondant can add a response to a claim, and a response can only be added during case investigation status
+	check(cf.respondant != name(0), "case_id does not have a respondant");
+	check(cf.respondant == respondant, "must be the respondant of this case_id");
+	check(cf.case_status == case_status::CASE_SETUP, "case status does NOT allow respondant approval of arbitrator at this time");	
+
+	casefiles.modify(cf, get_self(), [&](auto &col) {
+		col.case_status = static_cast<uint8_t>(case_status::AWAITING_ARB_ACCEPT);
+		col.update_ts = time_point_sec(current_time_point());
+	});
+}
 
 void arbitration::respond(uint64_t case_id, uint64_t claim_id, name respondant, string response_link)
 {	

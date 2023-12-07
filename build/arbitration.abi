@@ -4,6 +4,20 @@
     "types": [],
     "structs": [
         {
+            "name": "acceptarb",
+            "base": "",
+            "fields": [
+                {
+                    "name": "respondant",
+                    "type": "name"
+                },
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "account",
             "base": "",
             "fields": [
@@ -479,6 +493,11 @@
         }
     ],
     "actions": [
+        {
+            "name": "acceptarb",
+            "type": "acceptarb",
+            "ricardian_contract": ""
+        },
         {
             "name": "addclaim",
             "type": "addclaim",
