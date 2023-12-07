@@ -417,7 +417,7 @@ void arbitration::startcase(uint64_t case_id, name assigned_arb, uint8_t number_
 	const auto& cf = casefiles.get(case_id, "Case not found");
 
 	//Check that the arbitrator is assigned to the case
-	check(assigned_arb != cf.arbitrator, "Only an assigned arbitrator can start a case");
+	check(assigned_arb == cf.arbitrator, "Only an assigned arbitrator can start a case");
 	
 	//Check that the case in arbs assigned status
 	check(cf.case_status == case_status::ARB_ASSIGNED, "Case status must be in ARB_ASSIGNED");
