@@ -265,6 +265,8 @@ public:
 #pragma endregion BP_Actions
 
 #pragma region Arb_Actions
+	ACTION arbacceptnom(name arbitrator, uint64_t case_id);
+
 
 	// Set the different languages the arbitrator will handle cases
 	// auth: arbitrator

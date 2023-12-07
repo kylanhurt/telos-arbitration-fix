@@ -50,6 +50,20 @@
             ]
         },
         {
+            "name": "arbacceptnom",
+            "base": "",
+            "fields": [
+                {
+                    "name": "arbitrator",
+                    "type": "name"
+                },
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "cancelcase",
             "base": "",
             "fields": [
@@ -501,6 +515,11 @@
         {
             "name": "addclaim",
             "type": "addclaim",
+            "ricardian_contract": ""
+        },
+        {
+            "name": "arbacceptnom",
+            "type": "arbacceptnom",
             "ricardian_contract": ""
         },
         {

@@ -567,6 +567,27 @@ void arbitration::setruling(uint64_t case_id, name assigned_arb, string case_rul
 	// notify_bp_accounts();
 }
 
+#pragma region Arb_Actions
+void arbitration::arbacceptnom(name arbitrator, uint64_t case_id)
+{
+	//authenticate
+	require_auth(arbitrator);
+
+	//open casefile tables and checks that the case exists
+	casefiles_table casefiles(get_self(), get_self().value);
+	const auto& cf = casefiles.get(case_id, "Case not found");
+
+	//Only respondant can add a response to a claim, and a response can only be added during case investigation status
+	check(cf.arbitrator == arbitrator, "must be the respondant of this case_id");
+	check(cf.case_status == case_status::AWAITING_ARB_ACCEPT, "case status does NOT allow arbitrator accepting case at this time");	
+
+	casefiles.modify(cf, get_self(), [&](auto &col) {
+		col.case_status = static_cast<uint8_t>(case_status::ARBS_ASSIGNED);
+		col.update_ts = time_point_sec(current_time_point());
+	});
+}
+#pragma endregion Arb_Actions
+
 #pragma endregion Case_Actions
 
 #pragma region BP_Actions
