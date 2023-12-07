@@ -108,7 +108,7 @@ void arbitration::withdraw(name owner)
 	accounts.erase(bal);
 }
 
-void arbitration::filecase(name claimant, string claim_link, vector<uint16_t> lang_codes, std::optional<name> respondant, name arbitrator, uint8_t claim_category)
+void arbitration::filecase(name claimant, string claim_link, std::optional<name> respondant, name arbitrator, uint8_t claim_category)
 {
 	//authenticate
 	require_auth(claimant);
@@ -138,7 +138,6 @@ void arbitration::filecase(name claimant, string claim_link, vector<uint16_t> la
 		col.respondant = *respondant;
 		col.arbitrator = arbitrator;
 		col.approvals = {};
-		col.required_langs = lang_codes;
 		col.number_claims = 1;
 		col.case_ruling = std::string("");
 		col.update_ts = time_point_sec(current_time_point());

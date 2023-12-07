@@ -166,7 +166,7 @@ public:
 	// Files a new case
 	// auth: claimant
 	// NOTE: filing a case doesn't require a respondent
-	ACTION filecase(name claimant, string claim_link, vector<uint16_t> lang_codes,
+	ACTION filecase(name claimant, string claim_link,
 									std::optional<name> respondant, name arbitrator, uint8_t claim_category);
 
 	// Adds a claim for an existing case
@@ -356,7 +356,6 @@ public:
 		name arbitrator;
 		vector<name> approvals;
 		uint8_t number_claims;
-		vector<uint16_t> required_langs;
 		string case_ruling;
 		asset fee_paid_tlos = asset(0, TLOS_SYM);
 		time_point_sec update_ts;

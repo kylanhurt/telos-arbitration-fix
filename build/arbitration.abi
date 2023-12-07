@@ -78,10 +78,6 @@
                     "type": "uint8"
                 },
                 {
-                    "name": "required_langs",
-                    "type": "uint16[]"
-                },
-                {
                     "name": "case_ruling",
                     "type": "string"
                 },
@@ -200,10 +196,6 @@
                 {
                     "name": "claim_link",
                     "type": "string"
-                },
-                {
-                    "name": "lang_codes",
-                    "type": "uint16[]"
                 },
                 {
                     "name": "respondant",
