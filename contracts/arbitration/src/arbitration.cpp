@@ -108,7 +108,7 @@ void arbitration::withdraw(name owner)
 	accounts.erase(bal);
 }
 
-void arbitration::filecase(name claimant, string claim_link, vector<uint16_t> lang_codes, std::optional<name> respondant, uint8_t claim_category)
+void arbitration::filecase(name claimant, string claim_link, vector<uint16_t> lang_codes, std::optional<name> respondant, name arbitrator, uint8_t claim_category)
 {
 	//authenticate
 	require_auth(claimant);
@@ -120,6 +120,8 @@ void arbitration::filecase(name claimant, string claim_link, vector<uint16_t> la
 	if(respondant) {
 		check(is_account(*respondant), "Respondant must be an account");
 	}
+
+	check(is_account(arbitrator), "Arbitrator must be an account");
 
 	//Check that the claim category is valid
 	check(claim_category <= claim_category::MISC && claim_category >= claim_category::LOST_KEY_RECOVERY, "Claim category not found");
@@ -134,7 +136,7 @@ void arbitration::filecase(name claimant, string claim_link, vector<uint16_t> la
 		col.case_status = static_cast<uint8_t>(case_status::CASE_SETUP);
 		col.claimant = claimant;
 		col.respondant = *respondant;
-		col.arbitrators = {};
+		col.arbitrator = arbitrator;
 		col.approvals = {};
 		col.required_langs = lang_codes;
 		col.number_claims = 1;
@@ -312,7 +314,7 @@ void arbitration::readycase(uint64_t case_id, name claimant)
 
 	//Update casefile table
 	casefiles.modify(cf, get_self(), [&](auto &col) {
-		col.case_status = static_cast<uint8_t>(case_status::AWAITING_ARBS);
+		col.case_status = static_cast<uint8_t>(case_status::AWAITING_RESP_ACCEPT_ARB);
 		col.update_ts = time_point_sec(current_time_point());
 	});
 }
@@ -328,7 +330,7 @@ void arbitration::cancelcase(uint64_t case_id) {
 	const auto& cf = casefiles.get(case_id, "Case not found");
 
 	//A case can only be canceled while it is in awaiting arbs status
-	check(cf.case_status == case_status::AWAITING_ARBS, "Case status must be in AWAITING ARBS");
+	check(cf.case_status == case_status::ARBS_ASSIGNED, "Case status must be in ARBS_ASSIGNED stage");
 
 	//authenticate
 	require_auth(cf.claimant);
@@ -396,8 +398,7 @@ void arbitration::startcase(uint64_t case_id, name assigned_arb, uint8_t number_
 	const auto& cf = casefiles.get(case_id, "Case not found");
 
 	//Check that the arbitrator is assigned to the case
-	auto arb_case = std::find(cf.arbitrators.begin(), cf.arbitrators.end(), assigned_arb);
-	check(arb_case != cf.arbitrators.end(), "Only an assigned arbitrator can start a case");
+	check(assigned_arb != cf.arbitrator, "Only an assigned arbitrator can start a case");
 	
 	//Check that the case in arbs assigned status
 	check(cf.case_status == case_status::ARBS_ASSIGNED, "Case status must be in ARBS_ASSIGNED");
@@ -437,8 +438,7 @@ void arbitration::reviewclaim(uint64_t case_id, uint64_t claim_id, name assigned
 	const auto& cf = casefiles.get(case_id, "Case not found");
 
 	//Check that the arbitrator is assigned to the case
-	auto arb_case = std::find(cf.arbitrators.begin(), cf.arbitrators.end(), assigned_arb);
-	check(arb_case != cf.arbitrators.end(), "Only an assigned arbitrator can review a claim");
+	check(assigned_arb == cf.arbitrator, "Only an assigned arbitrator can review a claim");
 
 	//Check that the case in investigation status
 	check(cf.case_status == case_status::CASE_INVESTIGATION, "To review a claim, case should be in investigation status");
@@ -488,8 +488,7 @@ void arbitration::settleclaim(uint64_t case_id, name assigned_arb, uint64_t clai
 	check(cf.case_status == case_status::CASE_INVESTIGATION, "To settle a claim, case should be in investigation status");
 
 	//Check that the arbitrator is assigned to the case
-	auto arb_case = std::find(cf.arbitrators.begin(), cf.arbitrators.end(), assigned_arb);
-	check(arb_case != cf.arbitrators.end(), "Only an assigned arbitrator can settle a claim");
+	check(assigned_arb == cf.arbitrator, "Only an assigned arbitrator can settle a claim");
 
 	//open claim tables and checks that the claim exists
 	claims_table claims(get_self(), case_id);
@@ -537,8 +536,7 @@ void arbitration::setruling(uint64_t case_id, name assigned_arb, string case_rul
 	check(all_claims_resolved(case_id), "There are claims that has not been resolved");
 	
 	//Check that the arbitrator is assigned to the case
-	auto arb_it = std::find(cf.arbitrators.begin(), cf.arbitrators.end(), assigned_arb);
-	check(arb_it != cf.arbitrators.end(), "Only an assigned arbitrator can set a ruling");
+	check(assigned_arb == cf.arbitrator, "Only an assigned arbitrator can set a ruling");
 
 	//Update casefile
 	casefiles.modify(cf, same_payer, [&](auto& col) {
@@ -608,9 +606,6 @@ void arbitration::validatecase(uint64_t case_id, bool proceed)
 		//Remove the telos returned from reserved funds
 		conf.reserved_funds -= tlos_returned;
 		configs.set(conf, get_self());
-
-		//open arbitrators table, get arbitrator
-
 	}
 
 	//Update casefile

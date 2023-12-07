@@ -66,8 +66,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "arbitrators",
-                    "type": "name[]"
+                    "name": "arbitrator",
+                    "type": "name"
                 },
                 {
                     "name": "approvals",
@@ -208,6 +208,10 @@
                 {
                     "name": "respondant",
                     "type": "name?"
+                },
+                {
+                    "name": "arbitrator",
+                    "type": "name"
                 },
                 {
                     "name": "claim_category",

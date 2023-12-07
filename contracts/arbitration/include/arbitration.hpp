@@ -48,7 +48,7 @@ public:
 	enum class case_status : uint8_t
 	{
 		CASE_SETUP = 0,
-		AWAITING_RESP_ACCEPT_ARB = 1
+		AWAITING_RESP_ACCEPT_ARB = 1,
 		AWAITING_ARB_ACCEPT = 2,
 		ARBS_ASSIGNED = 3,
 		CASE_INVESTIGATION = 4,
@@ -167,7 +167,7 @@ public:
 	// auth: claimant
 	// NOTE: filing a case doesn't require a respondent
 	ACTION filecase(name claimant, string claim_link, vector<uint16_t> lang_codes,
-									std::optional<name> respondant, uint8_t claim_category);
+									std::optional<name> respondant, name arbitrator, uint8_t claim_category);
 
 	// Adds a claim for an existing case
 	// pre: case must be in setup status
@@ -353,7 +353,7 @@ public:
 		uint8_t case_status;
 		name claimant;
 		name respondant;
-		vector<name> arbitrators;
+		name arbitrator;
 		vector<name> approvals;
 		uint8_t number_claims;
 		vector<uint16_t> required_langs;
@@ -371,7 +371,7 @@ public:
 			return (claimant_id << 64) | respondant_id;
 		}
 
-		EOSLIB_SERIALIZE(casefile, (case_id)(case_status)(claimant)(respondant)(arbitrators)(approvals)(number_claims)(case_ruling)(fee_paid_tlos)(update_ts))
+		EOSLIB_SERIALIZE(casefile, (case_id)(case_status)(claimant)(respondant)(arbitrator)(approvals)(number_claims)(case_ruling)(fee_paid_tlos)(update_ts))
 	};
 	typedef multi_index<name("casefiles"), casefile> casefiles_table;
 
