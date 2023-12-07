@@ -1,0 +1,7 @@
+contracts:
+  arbitration:
+    abi: testing/contracts_source/arbitration/arbitration.abi
+    fixturesDir: tests/fixtures/arbitration
+    name: arbitration
+    wasm: build/arbitration.wasm
+options: null

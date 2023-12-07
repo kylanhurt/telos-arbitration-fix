@@ -4,6 +4,20 @@
     "types": [],
     "structs": [
         {
+            "name": "acceptarb",
+            "base": "",
+            "fields": [
+                {
+                    "name": "respondant",
+                    "type": "name"
+                },
+                {
+                    "name": "case_id",
+                    "type": "uint64"
+                }
+            ]
+        },
+        {
             "name": "account",
             "base": "",
             "fields": [
@@ -36,58 +50,16 @@
             ]
         },
         {
-            "name": "arbitrator",
+            "name": "arbacceptnom",
             "base": "",
             "fields": [
                 {
-                    "name": "arb",
+                    "name": "arbitrator",
                     "type": "name"
                 },
                 {
-                    "name": "arb_status",
-                    "type": "uint8"
-                },
-                {
-                    "name": "open_case_ids",
-                    "type": "uint64[]"
-                },
-                {
-                    "name": "closed_case_ids",
-                    "type": "uint64[]"
-                },
-                {
-                    "name": "recused_case_ids",
-                    "type": "uint64[]"
-                },
-                {
-                    "name": "credentials_link",
-                    "type": "string"
-                },
-                {
-                    "name": "elected_time",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "term_expiration",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "languages",
-                    "type": "uint16[]"
-                }
-            ]
-        },
-        {
-            "name": "beginvoting",
-            "base": "",
-            "fields": [
-                {
-                    "name": "ballot_name",
-                    "type": "name"
-                },
-                {
-                    "name": "runoff",
-                    "type": "bool"
+                    "name": "case_id",
+                    "type": "uint64"
                 }
             ]
         },
@@ -98,40 +70,6 @@
                 {
                     "name": "case_id",
                     "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "candaddlead",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee",
-                    "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "candidate",
-            "base": "",
-            "fields": [
-                {
-                    "name": "name",
-                    "type": "name"
-                },
-                {
-                    "name": "votes",
-                    "type": "asset"
-                }
-            ]
-        },
-        {
-            "name": "candrmvlead",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee",
-                    "type": "name"
                 }
             ]
         },
@@ -156,8 +94,8 @@
                     "type": "name"
                 },
                 {
-                    "name": "arbitrators",
-                    "type": "name[]"
+                    "name": "arbitrator",
+                    "type": "name"
                 },
                 {
                     "name": "approvals",
@@ -168,14 +106,6 @@
                     "type": "uint8"
                 },
                 {
-                    "name": "number_offers",
-                    "type": "uint8"
-                },
-                {
-                    "name": "required_langs",
-                    "type": "uint16[]"
-                },
-                {
                     "name": "case_ruling",
                     "type": "string"
                 },
@@ -184,15 +114,7 @@
                     "type": "asset"
                 },
                 {
-                    "name": "arbitrator_cost_tlos",
-                    "type": "asset"
-                },
-                {
                     "name": "update_ts",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "sending_offers_until_ts",
                     "type": "time_point_sec"
                 }
             ]
@@ -274,34 +196,6 @@
                     "type": "string"
                 },
                 {
-                    "name": "max_elected_arbs",
-                    "type": "uint16"
-                },
-                {
-                    "name": "election_voting_ts",
-                    "type": "uint32"
-                },
-                {
-                    "name": "runoff_election_voting_ts",
-                    "type": "uint32"
-                },
-                {
-                    "name": "election_add_candidates_ts",
-                    "type": "uint32"
-                },
-                {
-                    "name": "arb_term_length",
-                    "type": "uint32"
-                },
-                {
-                    "name": "claimant_accepting_offers_ts",
-                    "type": "uint32"
-                },
-                {
-                    "name": "current_election_id",
-                    "type": "uint64"
-                },
-                {
                     "name": "max_claims_per_case",
                     "type": "uint8"
                 },
@@ -320,85 +214,6 @@
             ]
         },
         {
-            "name": "dismissarb",
-            "base": "",
-            "fields": [
-                {
-                    "name": "arbitrator",
-                    "type": "name"
-                },
-                {
-                    "name": "remove_from_cases",
-                    "type": "bool"
-                }
-            ]
-        },
-        {
-            "name": "dismissoffer",
-            "base": "",
-            "fields": [
-                {
-                    "name": "case_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "offer_id",
-                    "type": "uint64"
-                }
-            ]
-        },
-        {
-            "name": "election",
-            "base": "",
-            "fields": [
-                {
-                    "name": "election_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "ballot_name",
-                    "type": "name"
-                },
-                {
-                    "name": "info_url",
-                    "type": "string"
-                },
-                {
-                    "name": "candidates",
-                    "type": "candidate[]"
-                },
-                {
-                    "name": "available_seats",
-                    "type": "uint8"
-                },
-                {
-                    "name": "begin_add_candidates_ts",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "end_add_candidates_ts",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "begin_voting_ts",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "end_voting_ts",
-                    "type": "time_point_sec"
-                },
-                {
-                    "name": "status",
-                    "type": "uint8"
-                }
-            ]
-        },
-        {
-            "name": "endelection",
-            "base": "",
-            "fields": []
-        },
-        {
             "name": "filecase",
             "base": "",
             "fields": [
@@ -411,62 +226,16 @@
                     "type": "string"
                 },
                 {
-                    "name": "lang_codes",
-                    "type": "uint16[]"
-                },
-                {
                     "name": "respondant",
                     "type": "name?"
                 },
                 {
-                    "name": "claim_category",
-                    "type": "uint8"
-                }
-            ]
-        },
-        {
-            "name": "forcerecusal",
-            "base": "",
-            "fields": [
-                {
-                    "name": "case_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "rationale",
-                    "type": "string"
-                },
-                {
                     "name": "arbitrator",
                     "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "hydraload",
-            "base": "",
-            "fields": [
-                {
-                    "name": "payload",
-                    "type": "hydraload_payload[]"
-                }
-            ]
-        },
-        {
-            "name": "hydraload_payload",
-            "base": "",
-            "fields": [
-                {
-                    "name": "table_name",
-                    "type": "name"
                 },
                 {
-                    "name": "scope",
-                    "type": "name"
-                },
-                {
-                    "name": "row_data",
-                    "type": "bytes"
+                    "name": "claim_category",
+                    "type": "uint8"
                 }
             ]
         },
@@ -481,126 +250,6 @@
             ]
         },
         {
-            "name": "initelection",
-            "base": "",
-            "fields": [
-                {
-                    "name": "content",
-                    "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "joinder",
-            "base": "",
-            "fields": [
-                {
-                    "name": "join_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "cases",
-                    "type": "uint64[]"
-                },
-                {
-                    "name": "join_time",
-                    "type": "uint32"
-                },
-                {
-                    "name": "joined_by",
-                    "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "makeoffer",
-            "base": "",
-            "fields": [
-                {
-                    "name": "case_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "offer_id",
-                    "type": "int64"
-                },
-                {
-                    "name": "arbitrator",
-                    "type": "name"
-                },
-                {
-                    "name": "hourly_rate",
-                    "type": "asset"
-                },
-                {
-                    "name": "estimated_hours",
-                    "type": "uint8"
-                }
-            ]
-        },
-        {
-            "name": "newarbstatus",
-            "base": "",
-            "fields": [
-                {
-                    "name": "arbitrator",
-                    "type": "name"
-                },
-                {
-                    "name": "new_status",
-                    "type": "uint8"
-                }
-            ]
-        },
-        {
-            "name": "nominee",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee_name",
-                    "type": "name"
-                },
-                {
-                    "name": "credentials_link",
-                    "type": "string"
-                },
-                {
-                    "name": "application_time",
-                    "type": "time_point_sec"
-                }
-            ]
-        },
-        {
-            "name": "offer",
-            "base": "",
-            "fields": [
-                {
-                    "name": "offer_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "case_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "status",
-                    "type": "uint8"
-                },
-                {
-                    "name": "estimated_hours",
-                    "type": "uint8"
-                },
-                {
-                    "name": "arbitrator",
-                    "type": "name"
-                },
-                {
-                    "name": "hourly_rate",
-                    "type": "asset"
-                }
-            ]
-        },
-        {
             "name": "readycase",
             "base": "",
             "fields": [
@@ -611,38 +260,6 @@
                 {
                     "name": "claimant",
                     "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "recuse",
-            "base": "",
-            "fields": [
-                {
-                    "name": "case_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "rationale",
-                    "type": "string"
-                },
-                {
-                    "name": "assigned_arb",
-                    "type": "name"
-                }
-            ]
-        },
-        {
-            "name": "regarb",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee",
-                    "type": "name"
-                },
-                {
-                    "name": "credentials_link",
-                    "type": "string"
                 }
             ]
         },
@@ -683,24 +300,6 @@
                 {
                     "name": "response_link",
                     "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "respondoffer",
-            "base": "",
-            "fields": [
-                {
-                    "name": "case_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "offer_id",
-                    "type": "uint64"
-                },
-                {
-                    "name": "accept",
-                    "type": "bool"
                 }
             ]
         },
@@ -761,50 +360,12 @@
             "base": "",
             "fields": [
                 {
-                    "name": "max_elected_arbs",
-                    "type": "uint16"
-                },
-                {
-                    "name": "election_duration",
-                    "type": "uint32"
-                },
-                {
-                    "name": "runoff_duration",
-                    "type": "uint32"
-                },
-                {
-                    "name": "election_add_candidates_duration",
-                    "type": "uint32"
-                },
-                {
-                    "name": "arbitrator_term_length",
-                    "type": "uint32"
-                },
-                {
                     "name": "max_claims_per_case",
                     "type": "uint8"
                 },
                 {
                     "name": "fee_usd",
                     "type": "asset"
-                },
-                {
-                    "name": "claimant_accepting_offers_duration",
-                    "type": "uint32"
-                }
-            ]
-        },
-        {
-            "name": "setlangcodes",
-            "base": "",
-            "fields": [
-                {
-                    "name": "arbitrator",
-                    "type": "name"
-                },
-                {
-                    "name": "lang_codes",
-                    "type": "uint16[]"
                 }
             ]
         },
@@ -877,11 +438,6 @@
             ]
         },
         {
-            "name": "skiptovoting",
-            "base": "",
-            "fields": []
-        },
-        {
             "name": "startcase",
             "base": "",
             "fields": [
@@ -900,16 +456,6 @@
                 {
                     "name": "response_info_required",
                     "type": "string"
-                }
-            ]
-        },
-        {
-            "name": "unregnominee",
-            "base": "",
-            "fields": [
-                {
-                    "name": "nominee",
-                    "type": "name"
                 }
             ]
         },
@@ -962,13 +508,18 @@
     ],
     "actions": [
         {
+            "name": "acceptarb",
+            "type": "acceptarb",
+            "ricardian_contract": ""
+        },
+        {
             "name": "addclaim",
             "type": "addclaim",
             "ricardian_contract": ""
         },
         {
-            "name": "beginvoting",
-            "type": "beginvoting",
+            "name": "arbacceptnom",
+            "type": "arbacceptnom",
             "ricardian_contract": ""
         },
         {
@@ -977,33 +528,8 @@
             "ricardian_contract": ""
         },
         {
-            "name": "candaddlead",
-            "type": "candaddlead",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "candrmvlead",
-            "type": "candrmvlead",
-            "ricardian_contract": ""
-        },
-        {
             "name": "closecase",
             "type": "closecase",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "dismissarb",
-            "type": "dismissarb",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "dismissoffer",
-            "type": "dismissoffer",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "endelection",
-            "type": "endelection",
             "ricardian_contract": ""
         },
         {
@@ -1012,48 +538,13 @@
             "ricardian_contract": ""
         },
         {
-            "name": "forcerecusal",
-            "type": "forcerecusal",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "hydraload",
-            "type": "hydraload",
-            "ricardian_contract": ""
-        },
-        {
             "name": "init",
             "type": "init",
             "ricardian_contract": ""
         },
         {
-            "name": "initelection",
-            "type": "initelection",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "makeoffer",
-            "type": "makeoffer",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "newarbstatus",
-            "type": "newarbstatus",
-            "ricardian_contract": ""
-        },
-        {
             "name": "readycase",
             "type": "readycase",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "recuse",
-            "type": "recuse",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "regarb",
-            "type": "regarb",
             "ricardian_contract": ""
         },
         {
@@ -1064,11 +555,6 @@
         {
             "name": "respond",
             "type": "respond",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "respondoffer",
-            "type": "respondoffer",
             "ricardian_contract": ""
         },
         {
@@ -1084,11 +570,6 @@
         {
             "name": "setconfig",
             "type": "setconfig",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "setlangcodes",
-            "type": "setlangcodes",
             "ricardian_contract": ""
         },
         {
@@ -1112,18 +593,8 @@
             "ricardian_contract": ""
         },
         {
-            "name": "skiptovoting",
-            "type": "skiptovoting",
-            "ricardian_contract": ""
-        },
-        {
             "name": "startcase",
             "type": "startcase",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "unregnominee",
-            "type": "unregnominee",
             "ricardian_contract": ""
         },
         {
@@ -1151,13 +622,6 @@
             "key_types": []
         },
         {
-            "name": "arbitrators",
-            "type": "arbitrator",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
             "name": "casefiles",
             "type": "casefile",
             "index_type": "i64",
@@ -1174,34 +638,6 @@
         {
             "name": "config",
             "type": "config",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "elections",
-            "type": "election",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "joinedcases",
-            "type": "joinder",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "nominees",
-            "type": "nominee",
-            "index_type": "i64",
-            "key_names": [],
-            "key_types": []
-        },
-        {
-            "name": "offers",
-            "type": "offer",
             "index_type": "i64",
             "key_names": [],
             "key_types": []

@@ -1,0 +1,19 @@
+{
+    "scope": [
+        {
+            "admin": "user1",
+            "contract_version": "string",
+            "max_elected_arbs": 123,
+            "election_voting_ts": 123,
+            "runoff_election_voting_ts": 123,
+            "election_add_candidates_ts": 123,
+            "arb_term_length": 123,
+            "claimant_accepting_offers_ts": 123,
+            "current_election_id": "123456",
+            "max_claims_per_case": 123,
+            "fee_usd": "1.2345 EOS",
+            "available_funds": "1.2345 EOS",
+            "reserved_funds": "1.2345 EOS"
+        }
+    ]
+}
